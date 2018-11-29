@@ -18,7 +18,7 @@ connection <- dbConnect(
   bigrquery::bigquery(),
   project = "bigquery-public-data",
   dataset = "ncaa_basketball",
-  billing = myBilling
+  billing = myBilling # This object is created in myProjectBilling.R
 )
 
 # --------------------- Creating a data table ----------------------------
