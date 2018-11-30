@@ -44,6 +44,7 @@ games <- tbl(connection, "mbb_players_games_sr") %>%
 # DO NOT test your table creation too frequently!
 # The queries for Google BigQuery are expensive, and I don't want
 # us to go over our limits (free limit is 1 TB = 1000 GB of queries)
+# the amount used when you run your command is in the console as "Billed: X MB)
 
 # ---------------- Creating data tables for shiny document ----------------
 
@@ -55,6 +56,10 @@ games <- tbl(connection, "mbb_players_games_sr") %>%
 # and output the table (or draw the visualization). All of the code below
 # should be in function bodies.
 
+# For reference, here is the NCAA Dataset so you can get the correct
+# subdataset names and preview the datasets to figure out what you
+# need to do witht the data columns to get your desired result:
+# https://console.cloud.google.com/marketplace/details/ncaa-bb-public/ncaa-basketball
 
-#Create table functions here
+# Create table functions here
 
