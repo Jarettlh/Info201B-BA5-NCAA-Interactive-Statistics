@@ -179,7 +179,7 @@ getBestAvgForPlayerInYear <- function(year) {
 }
 
 ## What team had the highest ammount of points scored in a game for certain season?
-getBestRecordInYear <- function(year) {
+getHighestPointInGameForYear <- function(year) {
   games <- tbl(connection, "mbb_teams_games_sr") %>%
     filter(season == as.integer(year)) %>% 
     filter(points == max(points)) %>% 
@@ -188,4 +188,72 @@ getBestRecordInYear <- function(year) {
   
   return(games[1,])
 }
+
+## What team had the highest number of
+# Assists in a game 
+getHighestAssistsInGameForYear <- function(year) {
+  games <- tbl(connection, "mbb_teams_games_sr") %>%
+    filter(season == as.integer(year)) %>% 
+    filter(assists == max(assists)) %>% 
+    select(market, name, gametime, season, assists) %>%
+    collect()
+  
+  return(games[1,])
+}
+
+# Field goals made in a game
+getHighestFieldGoalsMadeInGameForYear <- function(year) {
+  games <- tbl(connection, "mbb_teams_games_sr") %>%
+    filter(season == as.integer(year)) %>% 
+    filter(field_goals_made == max(field_goals_made)) %>% 
+    select(market, name, gametime, season, field_goals_made) %>%
+    collect()
+  
+  return(games[1,])
+}
+
+# Field goals attempted in a game
+getHighestFieldGoalsAttemptedInGameForYear <- function(year) {
+  games <- tbl(connection, "mbb_teams_games_sr") %>%
+    filter(season == as.integer(year)) %>% 
+    filter(field_goals_att == max(field_goals_att)) %>% 
+    select(market, name, gametime, season, field_goals_att) %>%
+    collect()
+  
+  return(games[1,])
+}
+
+# Field goal percentage in a game
+getHighestFieldGoalsPercentageInGameForYear <- function(year) {
+  games <- tbl(connection, "mbb_teams_games_sr") %>%
+    filter(season == as.integer(year)) %>% 
+    filter(field_goals_pct == max(field_goals_pct)) %>% 
+    select(market, name, gametime, season, field_goals_pct) %>%
+    collect()
+  
+  return(games[1,])
+}
+
+# Three pointers made in a game
+getHighestThreePointMadeInGameForYear <- function(year) {
+  games <- tbl(connection, "mbb_teams_games_sr") %>%
+    filter(season == as.integer(year)) %>% 
+    filter(three_points_made == max(three_points_made)) %>% 
+    select(market, name, gametime, season, three_points_made) %>%
+    collect()
+  
+  return(games[1,])
+}
+
+# Fouls in a game
+getHighestFoulsInGameForYear <- function(year) {
+  games <- tbl(connection, "mbb_teams_games_sr") %>%
+    filter(season == as.integer(year)) %>% 
+    filter(personal_fouls == max(personal_fouls)) %>% 
+    select(market, name, gametime, season, personal_fouls) %>%
+    collect()
+  
+  return(games[1,])
+}
+
 
