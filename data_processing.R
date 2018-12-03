@@ -40,14 +40,11 @@ connection <- dbConnect(
 #   filter(scheduled_date == "2017-11-20") %>% 
 #   collect()
 
-
 # IMPORTANT NOTE 1:
 # DO NOT test your table creation too frequently!
 # The queries for Google BigQuery are expensive, and I don't want
 # us to go over our limits (free limit is 1 TB = 1000 GB of queries)
 # the amount used when you run your command is in the console as "Billed: X MB)
-
-# ---------------- Creating data tables for shiny document ----------------
 
 # IMPORTANT NOTE 2:
 # This file will be sourced, so make sure that nothing below runs when sourced!
@@ -57,15 +54,16 @@ connection <- dbConnect(
 # and output the table (or draw the visualization). All of the code below
 # should be in function bodies.
 
-
-
 # For reference, here is the NCAA Dataset so you can get the correct
 # subdataset names and preview the datasets to figure out what you
 # need to do witht the data columns to get your desired result:
 # https://console.cloud.google.com/marketplace/details/ncaa-bb-public/ncaa-basketball
 
-# Create table functions here
 
+# ---------------- Creating data tables for shiny document ----------------
+
+
+# This table filters the 'mbb_players_games_sr' dataset for SETH
 get_player_data <- function (name) {
   player_data <- tbl(connection, "mbb_players_games_sr") %>% 
     filter(full_name == name) %>%
@@ -92,7 +90,7 @@ create_percent_season_plot <- function (name) {
   print(p)
 }
 
-# This table filters the 'mbb_players_games_sr' dataset (MICHELLE)
+# This table filters the 'mbb_players_games_sr' dataset for MICHELLE
 get_player_foul_data <- function (name) {
   player_data <- tbl(connection, "mbb_players_games_sr") %>%
     filter(full_name == name) %>%
@@ -103,7 +101,7 @@ get_player_foul_data <- function (name) {
     collect()
 }
 
-# This function will return a specific player's most recent season. 
+# This function will return a specific player's most recent season (MICHELLE)
 # This functio will calculate two percentages:
 # 1. What percentage of games a player played in, in their most recent season
 # 2. In the given season, what percentage of games a player played in and was in foul trouble 
