@@ -147,3 +147,40 @@ collectPlayerData <- function(playerName) {
   return(finalStatement[1])
 }
 
+## Given Year (IBRAR)
+## Who was the best player in a single game for certian season?
+getBestPlayerInSingleGameForYear <- function(year) {
+  games <- tbl(connection, "mbb_players_games_sr") %>% 
+    filter(season == as.integer(year)) %>% 
+    filter(points == max(points)) %>% 
+    select(full_name, scheduled_date, jersey_number, field_goals_made, field_goals_att, field_goals_pct, points) %>%
+    collect()
+  
+  return(games)
+}
+
+## Which player had the most avg points in a certain season?
+getBestAvgForPlayerInYear <- function(year) {
+  games <- tbl(connection, "mbb_players_games_sr") %>%
+    filter(season == as.integer(year)) %>%
+    select(full_name, points) %>% 
+    group_by(full_name) %>% 
+    mutate(pointsAvg = mean(points)) %>% 
+    filter(pointsAvg == max(pointsAvg)) %>% 
+    arrange(-pointsAvg) %>% 
+    collect()
+  
+  return(games[1,])
+}
+
+## What team had the highest ammount of points scored in a game for certain season?
+getBestRecordInYear <- function(year) {
+  games <- tbl(connection, "mbb_teams_games_sr") %>%
+    filter(season == as.integer(year)) %>% 
+    filter(points == max(points)) %>% 
+    select(market, name, gametime, season, points) %>%
+    collect()
+  
+  return(games)
+}
+
