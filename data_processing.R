@@ -5,6 +5,9 @@
 
 library(bigrquery)
 library(dplyr)
+library(ggplot2)
+library(zoo)
+library(reshape2)
 
 # ---------------------- Setting up Google BigQuery ----------------------
 
@@ -72,6 +75,7 @@ get_player_data <- function (name) {
     collect()
 }
 
+
 # Rolling Averages Function (SETH)
 create_percent_season_plot <- function (name) {
   player_data <- get_player_data(name)
@@ -89,6 +93,7 @@ create_percent_season_plot <- function (name) {
     scale_colour_manual(values=c("green", "yellow", "red"))
   print(p)
 }
+
 
 # This table filters the 'mbb_players_games_sr' dataset for MICHELLE
 get_player_foul_data <- function (name) {
@@ -142,8 +147,8 @@ collectPlayerData <- function(playerName) {
   
   # Return a statement with games played percentage and games spent in foul trouble percentage
   finalStatement <- paste0(playerName, " played in ", gamesPlayedPercent, "% of games in the ", player_data$season,
-    " season. Of these games ", playerName, " played in, they spent ", frequencyInFoulTrouble,
-      " of the season in foul trouble.")
+    " season. Of these games, they spent ", round(frequencyInFoulTrouble),
+      " in foul trouble.")
   return(finalStatement[1])
 }
 
@@ -156,7 +161,7 @@ getBestPlayerInSingleGameForYear <- function(year) {
     select(full_name, scheduled_date, jersey_number, field_goals_made, field_goals_att, field_goals_pct, points) %>%
     collect()
   
-  return(games)
+  return(games[1,])
 }
 
 ## Which player had the most avg points in a certain season?
@@ -181,6 +186,6 @@ getBestRecordInYear <- function(year) {
     select(market, name, gametime, season, points) %>%
     collect()
   
-  return(games)
+  return(games[1,])
 }
 
