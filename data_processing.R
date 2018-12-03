@@ -35,10 +35,10 @@ connection <- dbConnect(
 # And after using dplyr to make your table, end with:
 # collect()
 
-games <- tbl(connection, "mbb_players_games_sr") %>% 
-  select(game_id, scheduled_date) %>%
-  filter(scheduled_date == "2017-11-20") %>% 
-  collect()
+# games <- tbl(connection, "mbb_players_games_sr") %>% 
+#   select(game_id, scheduled_date) %>%
+#   filter(scheduled_date == "2017-11-20") %>% 
+#   collect()
 
 # IMPORTANT NOTE 1:
 # DO NOT test your table creation too frequently!
@@ -55,6 +55,14 @@ games <- tbl(connection, "mbb_players_games_sr") %>%
 # into a function. It should take in a string (player, team, or year)
 # and output the table (or draw the visualization). All of the code below
 # should be in function bodies.
+get_player_data <- function (name) {
+  player_data <- tbl(connection, "mbb_players_games_sr") %>% 
+    filter(full_name == name) %>%
+    filter(season == max(season)) %>% 
+    select(full_name, season, scheduled_date, team_name, free_throws_pct, two_points_pct, three_points_pct) %>%
+    collect()
+}
+
 
 # For reference, here is the NCAA Dataset so you can get the correct
 # subdataset names and preview the datasets to figure out what you
@@ -62,4 +70,22 @@ games <- tbl(connection, "mbb_players_games_sr") %>%
 # https://console.cloud.google.com/marketplace/details/ncaa-bb-public/ncaa-basketball
 
 # Create table functions here
+# player_data <- get_player_data("Lonzo Ball")
+# ordered_player_data <- player_data[order(as.Date(player_data$scheduled_date)),]
 
+create_percent_season_plot <- function (name) {
+  player_data <- get_player_data(name)
+  ordered_player_data <- player_data[order(as.Date(player_data$scheduled_date)),]
+  ordered_player_data <- data.frame(ordered_player_data, "Average Free Throw" = rollmean(ordered_player_data$free_throws_pct, 4, fill = NA, align=c("right")),
+                                    "Average Two Pointer" = rollmean(ordered_player_data$two_points_pct, 4, fill = NA, align=c("right")), 
+                                    "Average Three Pointer" = rollmean(ordered_player_data$three_points_pct, 4, fill = NA, align=c("right")))
+  melted_data <- melt(ordered_player_data, id = c("full_name", "season", "scheduled_date", "team_name", "free_throws_pct", "two_points_pct", 
+                                                  "three_points_pct"))
+  p <- ggplot(melted_data, aes(scheduled_date, value, colour = variable)) +
+    geom_line(size = 1.2) +
+    xlab("Date") +
+    ylab("Percent Made") +
+    ggtitle(paste0("Rolling Shot Averages, ", name, ", ", ordered_player_data[1,2], " Season")) +
+    scale_colour_manual(values=c("green", "yellow", "red"))
+  print(p)
+}
