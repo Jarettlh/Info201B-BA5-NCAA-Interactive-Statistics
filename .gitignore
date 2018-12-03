@@ -1,3 +1,6 @@
+# Google auth file for BigQuery
+.httr-oauth
+
 # DS store for mac
 .DS_Store
 
