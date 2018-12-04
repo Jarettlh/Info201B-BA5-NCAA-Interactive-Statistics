@@ -94,6 +94,57 @@ create_percent_season_plot <- function (name) {
   print(p)
 }
 
+# Pulls all shot data for a player for their most recent season (SETH)
+get_player_shot_data <- function (name) {
+  player_data <- tbl(connection, "mbb_pbp_sr") %>%
+    filter(player_full_name == name) %>%
+    filter(season == max(season), is.na(shot_type) == FALSE) %>%
+    select(player_full_name, season, shot_type, shot_made) %>%
+    collect()
+}
+
+# This function creates a bar plot displaying the various shot types taken by a certain player in their most
+# recent season. It displays a black bar of the total amount of that type of shot taken, overlayed with a 
+# green bar indicating the amount of those shots made (SETH)
+shot_type_comparison <- function (name) {
+  shots <- get_player_shot_data(name)
+  grouped_shots <- shots %>%
+    select(shot_type, shot_made) %>%
+    group_by(shot_type, shot_made) %>%
+    summarise(Freq = n())
+  p <- ggplot(grouped_shots, aes(shot_type, Freq)) +
+    stat_summary(fun.y = sum, geom = "bar") +
+    geom_bar(stat = "identity", aes(fill = shot_made)) +
+    scale_fill_manual(name = "Shots", values = c("black", "green"),labels = c("Total Shots", "Made Shots")) +
+    xlab("Shot Type") +
+    ylab("Frequency") +
+    ggtitle(paste0("Shot Type Frequency and Success, ", name, ", ", shots[1,2], " Season"))
+  print(p)
+}
+
+# Pulls blocks, assists, points data for a selected player's most recent season (SETH)
+get_player_point_block_assist_data <- function (name) {
+  p_b_a_data <- tbl(connection, "mbb_players_games_sr") %>%
+    filter(full_name == name) %>%
+    filter(season == max(season)) %>%
+    select(full_name, season, scheduled_date, points, blocks, assists) %>%
+    collect()
+}
+
+# This function display a line graph over a player's most recent season. It will display the amount of blocks,
+# assists, and point over the season per game (SETH)
+point_assist_block_comparison <- function (name) {
+  p_b_a_data <- get_player_point_block_assist_data(name)
+  melted_data <- melt(p_b_a_data, id = c("full_name", "season", "scheduled_date"))
+  p <- ggplot(melted_data, aes(scheduled_date, value, colour = variable)) +
+    geom_line(size = 1.2) +
+    xlab("Date") +
+    ylab("Count") +
+    ggtitle(paste0("Points, Blocks, Assists, ", name, ", ", p_b_a_data[1,2], " Season")) +
+    scale_colour_manual(values=c("green", "red", "cyan"))
+  print(p)
+}
+
 # This function will return a specific player's most recent season (MICHELLE) 
 # This functio will calculate two percentages:
 # 1. What percentage of games a player played in, in their most recent season
