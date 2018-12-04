@@ -94,25 +94,20 @@ create_percent_season_plot <- function (name) {
   print(p)
 }
 
-
-# This table filters the 'mbb_players_games_sr' dataset for MICHELLE
-get_player_foul_data <- function (name) {
-  player_data <- tbl(connection, "mbb_players_games_sr") %>%
-    filter(full_name == name) %>%
-    filter(season == max(season)) %>%
-    select(full_name, season, team_name, jersey_number, height, weight, 
-      personal_fouls, tech_fouls, flagrant_fouls, minutes, played, 
-        birth_place) %>%
-    collect()
-}
-
-# This function will return a specific player's most recent season (MICHELLE)
+# This function will return a specific player's most recent season (MICHELLE) 
 # This functio will calculate two percentages:
 # 1. What percentage of games a player played in, in their most recent season
 # 2. In the given season, what percentage of games a player played in and was in foul trouble 
 # NOTE: 'Foul trouble' is when a player is within one or two of fouling out 
 # Fouling out is having 6 fouls in a game
 collectPlayerData <- function(playerName) {
+  
+  # This table filters the 'mbb_players_games_sr' 
+  player_data <- tbl(connection, "mbb_players_games_sr") %>%
+    filter(full_name == name) %>%
+    filter(season == max(season)) %>%
+    select(full_name, season, team_name, personal_fouls, tech_fouls, flagrant_fouls, played) %>%
+    collect()
   
   # Grab the specific player's data
   player_data <- get_player_foul_data(playerName)
@@ -152,7 +147,7 @@ collectPlayerData <- function(playerName) {
   return(finalStatement[1])
 }
 
-# Returns a player's personal information 
+# Returns a player's personal information (Michelle)
 get_player_personal_data <- function (name) {
   player_personal_data <- tbl(connection, "mbb_players_games_sr") %>%
     filter(full_name == name) %>%
@@ -166,6 +161,80 @@ get_player_personal_data <- function (name) {
             player_personal_data$birth_place, " and was ", player_personal_data$weight, 
               " pounds in their most recent season.")
     return(finalStatement[1])
+}
+
+# Shows the average minutes played for a particular player over the course of their most recent season (Michelle) 
+playerMinutesPlayedSeason <- function (name) {
+  
+  # Filters the dataset to the player for their most recent season 
+  playerMinutesData <- tbl(connection, "mbb_players_games_sr") %>%
+    filter(full_name == name) %>%
+    filter(season == max(season)) %>%
+    select(minutes_int64, scheduled_date, season) %>%
+    collect()
+    playerMinutesData[is.na(playerMinutesData)] <- 0
+  
+  #Initialize variables
+  avgTimeNov <- 0
+  avgTimeDec <- 0
+  avgTimeJan <- 0
+  avgTimeFeb <- 0
+  avgTimeMar <- 0
+  gamesNov <- 0
+  gamesDec <- 0
+  gamesJan <- 0
+  gamesFeb <- 0
+  gamesMar <- 0
+  
+  # Convert scheduled date to just its month
+  playerMinutesData$newdate <- format(as.Date(playerMinutesData$scheduled_date), "%m")
+  for (i in 1:nrow(playerMinutesData)) {
+    
+    # Adds the player's game time on to November's average time if the game occurred in November
+    if(playerMinutesData$newdate[i] == "11") {
+      avgTimeNov <- avgTimeNov + (playerMinutesData$minutes_int64[i])
+      gamesNov <- gamesNov + 1
+    }
+    
+    # Adds the player's game time on to December's average time if the game occurred in December
+    if(playerMinutesData$newdate[i] == "12") {
+      avgTimeDec <- avgTimeDec + (playerMinutesData$minutes_int64[i])
+      gamesDec <- gamesDec + 1
+    }
+    
+    # Adds the player's game time on to January's average time if the game occurred in January
+    if(playerMinutesData$newdate[i] == "01") {
+      avgTimeJan <- avgTimeJan + (playerMinutesData$minutes_int64[i])
+      gamesJan <- gamesJan + 1
+    }
+    
+    # Adds the player's game time on to Febuary's average time if the game occurred in Febuary
+    if(playerMinutesData$newdate[i] == "02") {
+      avgTimeFeb <- avgTimeFeb + (playerMinutesData$minutes_int64[i])
+      gamesFeb <- gamesFeb + 1
+    }
+    
+    # Adds the player's game time on to March's average time if the game occurred in March
+    if(playerMinutesData$newdate[i] == "03") {
+      avgTimeMar <- avgTimeMar + (playerMinutesData$minutes_int64[i])
+      gamesMar <- gamesMar + 1
+    }
+  }
+  
+  # Calculate the player's average play time during the given month in the given season
+  avgTimeNov <- round((avgTimeNov / gamesNov), 0)
+  avgTimeDec <- round((avgTimeDec / gamesDec), 0)
+  avgTimeJan <- round((avgTimeJan / gamesJan), 0)
+  avgTimeFeb <- round((avgTimeFeb / gamesFeb), 0)
+  avgTimeMar <- round((avgTimeMar / gamesMar), 0)
+
+  # Plots the bar graph with the information
+  monthAvgCount <- c(avgTimeNov, avgTimeDec, avgTimeJan, avgTimeFeb, avgTimeMar)
+  months <- c("November", "December","January", "Febuary", "March")
+  colors <- c("pink", "blue", "green", "gray", "black")
+  averagePlayTimeBarPlot <- barplot(monthAvgCount, names.arg = months, col = colors, xlab = "Month", ylab = "Minutes",
+      main = paste0("Average minutes played for per month for ", name, " in the ", playerMinutesData$season[1], " Season."))
+  print(averagePlayTimeBarPlot)
 }
 
 ## Given Year (IBRAR)
