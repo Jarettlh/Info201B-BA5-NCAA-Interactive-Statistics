@@ -13,7 +13,7 @@ library(dplyr)
 # This file is seperate for each group member:
 # It contains the project ID for the  group member's
 # Google Cloud project for billing purposes
-source('./../myProjectBilling.R')
+source('./myProjectBilling.R')
 
 # Basic call for Google BigQuery using the bigrquery package
 # This simply points to the ncaa_basketball dataset
