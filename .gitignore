@@ -1,5 +1,6 @@
 # Google auth file for BigQuery
 .httr-oauth
+myProjectBilling.R
 
 # DS store for mac
 .DS_Store
