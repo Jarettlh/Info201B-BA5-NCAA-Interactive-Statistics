@@ -66,7 +66,8 @@ connection <- dbConnect(
 # ---------------- Creating data tables for shiny document ----------------
 
 
-# This table filters the 'mbb_players_games_sr' dataset for SETH
+# This table filters the 'mbb_players_games_sr' dataset, pulling shot percent data for a player's
+# most recent season (SETH)
 get_player_data <- function (name) {
   player_data <- tbl(connection, "mbb_players_games_sr") %>% 
     filter(full_name == name) %>%
@@ -76,7 +77,8 @@ get_player_data <- function (name) {
 }
 
 
-# Rolling Averages Function (SETH)
+# This function creates a line graph which displays a player's rolling averages for their most recent
+# season. This includes free throws, two pointers, and three pointers. (SETH)
 create_percent_season_plot <- function (name) {
   player_data <- get_player_data(name)
   ordered_player_data <- player_data[order(as.Date(player_data$scheduled_date)),]
