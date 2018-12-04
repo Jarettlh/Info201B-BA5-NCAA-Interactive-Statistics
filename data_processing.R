@@ -148,7 +148,7 @@ collectPlayerData <- function(playerName) {
 }
 
 # Returns a player's personal information (Michelle)
-get_player_personal_data <- function (name) {
+get_player_personal_data <- function(name) {
   player_personal_data <- tbl(connection, "mbb_players_games_sr") %>%
     filter(full_name == name) %>%
     filter(season == max(season)) %>%
@@ -164,7 +164,7 @@ get_player_personal_data <- function (name) {
 }
 
 # Shows the average minutes played for a particular player over the course of their most recent season (Michelle) 
-playerMinutesPlayedSeason <- function (name) {
+playerMinutesPlayedSeason <- function(name) {
   
   # Filters the dataset to the player for their most recent season 
   playerMinutesData <- tbl(connection, "mbb_players_games_sr") %>%
@@ -174,7 +174,7 @@ playerMinutesPlayedSeason <- function (name) {
     collect()
     playerMinutesData[is.na(playerMinutesData)] <- 0
   
-  #Initialize variables
+  # Initialize variables
   avgTimeNov <- 0
   avgTimeDec <- 0
   avgTimeJan <- 0
@@ -234,7 +234,62 @@ playerMinutesPlayedSeason <- function (name) {
   colors <- c("pink", "blue", "green", "gray", "black")
   averagePlayTimeBarPlot <- barplot(monthAvgCount, names.arg = months, col = colors, xlab = "Month", ylab = "Minutes",
       main = paste0("Average minutes played for per month for ", name, " in the ", playerMinutesData$season[1], " Season."))
-  print(averagePlayTimeBarPlot)
+}
+
+# Creates a barplot showing how many steals the players made each month
+playerStealsSeason <- function(name) {
+  
+  # Filters the dataset to the player for their most recent season 
+  playerStealsData <- tbl(connection, "mbb_players_games_sr") %>%
+    filter(full_name == name) %>%
+    filter(season == max(season)) %>%
+    select(steals, scheduled_date, season) %>%
+    collect()
+  playerStealsData[is.na(playerStealsData)] <- 0
+  
+  # Initialize variables
+  stealsNov <- 0
+  stealsDec <- 0
+  stealsJan <- 0
+  stealsFeb <- 0
+  stealsMar <- 0
+
+  # Convert scheduled date to just its month
+  playerStealsData$newdate <- format(as.Date(playerStealsData$scheduled_date), "%m")
+  for (i in 1:nrow(playerStealsData)) {
+    
+    # Calculates the total steals a specific player made in November
+    if(playerStealsData$newdate[i] == "11") {
+      stealsNov <- stealsNov + (playerStealsData$steals[i])
+    }
+  
+    # Calculates the total steals a specific player made in December
+    if(playerStealsData$newdate[i] == "12") {
+      stealsDec <- stealsDec + (playerStealsData$steals[i])
+    }
+    
+    # Calculates the total steals a specific player made in January
+    if(playerStealsData$newdate[i] == "01") {
+      stealsJan <- stealsJan + (playerStealsData$steals[i])
+    }
+    
+    # Calculates the total steals a specific player made in Febuary
+    if(playerStealsData$newdate[i] == "02") {
+      stealsFeb <- stealsFeb + (playerStealsData$steals[i])
+    }
+    
+    # Calculates the total steals a specific player made in March
+    if(playerStealsData$newdate[i] == "03") {
+      stealsMar <- stealsMar + (playerStealsData$steals[i])
+    }
+  }
+  
+  # Plots the bar graph with the information
+  stealsPerMonth <- c(stealsNov, stealsDec, stealsJan, stealsFeb, stealsMar)
+  months <- c("November", "December","January", "Febuary", "March")
+  colors <- c("pink", "blue", "green", "gray", "black")
+  stealsMadeBarPlot <- barplot(stealsPerMonth, names.arg = months, col = colors, xlab = "Month", 
+    ylab = "Steals", main = paste0("Number of blocks ", name, " made in the ", playerStealsData$season[1], " Season."))
 }
 
 ## Given Year (IBRAR)
