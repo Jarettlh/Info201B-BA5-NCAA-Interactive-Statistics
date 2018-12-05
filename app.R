@@ -20,11 +20,19 @@ source('./error_handling.R')
 # UI to display for users
 my_ui <- fluidPage(
   h1("NCAA College Basketball Interactive Statistics"),
-  h2("Using Google BigQuery"),
-  h3("Data is from 2013-2108 seasons"),
-  
+  h4("by Jarett Lund-Hopkins, Michelle Bridges, Seth Anderson, and Ibrar Aslam"),
+  h4("code is available at: https://github.com/Jarettlh/Info201B-BA5-NCAA-Interactive-Statistics"),
+  h3("Using a datset from Google BigQuery on NCAA Men's College Basketball, 
+     we have created an interactive page where you can input the name of
+     a Division 1 player, or a year between 2013-2018, and get a wide
+     variety of statistical information on said input."),
+  h4("Some examples you can try are: \"Trae Young\", \"Miles Bridges\", \"Kevin Knox\", or \"2017\" "),
+  h4("The statistics take some time to parse, please be patient (average 10-15 seconds)"),
   # Text box for input with button
-  textInput('userInputString', label = "Enter a Division 1 player, or year", value = ""),
+  textInput('userInputString', 
+            label = NULL, 
+            placeholder = "Enter a Division 1 player, or year", 
+            value = ""),
   submitButton("Show me statistics!"),
   
   # Output for all tables, plots, and statements

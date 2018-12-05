@@ -108,19 +108,19 @@ create_percent_season_plot <- function (name) {
   ordered_player_data <-
     data.frame(
       ordered_player_data,
-      "Average Free Throw" = rollmean(
+      "Free Throw Average" = rollmean(
         ordered_player_data$free_throws_pct,
         4,
         fill = NA,
         align = c("right")
       ),
-      "Average Two Pointer" = rollmean(
+      "Two Pointer Average" = rollmean(
         ordered_player_data$two_points_pct,
         4,
         fill = NA,
         align = c("right")
       ),
-      "Average Three Pointer" = rollmean(
+      "Three Pointer Average" = rollmean(
         ordered_player_data$three_points_pct,
         4,
         fill = NA,
@@ -145,14 +145,15 @@ create_percent_season_plot <- function (name) {
     geom_line(size = 1.2) +
     xlab("Date") +
     ylab("Percent Made") +
+    scale_colour_manual(values = c("green", "yellow", "red")) +
     ggtitle(paste0(
-      "Rolling Shot Averages, ",
+      "Rolling Shot Averages by ",
       name,
-      ", ",
+      " in the ",
       ordered_player_data[1, 2],
       " Season"
     )) +
-    scale_colour_manual(values = c("green", "yellow", "red"))
+    theme(plot.title = element_text(hjust = 0.5, face="bold"))
   print(p)
 }
 
@@ -186,8 +187,9 @@ shot_type_comparison <- function (name) {
     ) +
     xlab("Shot Type") +
     ylab("Frequency") +
-    ggtitle(paste0("Shot Type Frequency and Success, ", name, ", ", shots[1, 2], " Season"))
-  print(p)
+    ggtitle(paste0("Shot Type Frequency and Success by ", name, " in the ", shots[1, 2], " Season")) +
+    theme(plot.title = element_text(hjust = 0.5, face="bold"))
+    print(p)
 }
 
 # DEPENDANCY FOR PLAYER PLOT 3
@@ -212,8 +214,9 @@ point_assist_block_comparison <- function (name) {
     geom_line(size = 1.2) +
     xlab("Date") +
     ylab("Count") +
-    ggtitle(paste0("Points, Blocks, Assists, ", name, ", ", p_b_a_data[1, 2], " Season")) +
-    scale_colour_manual(values = c("green", "red", "cyan"))
+    scale_colour_manual(values = c("green", "red", "cyan")) +
+    ggtitle(paste0("Points, Blocks, and Assists by ", name, " in the ", p_b_a_data[1, 2], " Season")) +
+    theme(plot.title = element_text(hjust = 0.5, face="bold"))
   print(p)
 }
 
@@ -299,7 +302,7 @@ playerMinutesPlayedSeason <- function(name) {
         name,
         " in the ",
         playerMinutesData$season[1],
-        " Season."
+        " season"
       )
     )
   print(averagePlayTimeBarPlot)
@@ -370,7 +373,7 @@ playerStealsSeason <- function(name) {
         name,
         " made in the ",
         playerStealsData$season[1],
-        " Season."
+        " season"
       )
     )
   print(stealsMadeBarPlot)
@@ -435,10 +438,10 @@ mostRecentSeasonFoulTrouble <- function(playerName) {
     paste0(
       playerName,
       " played in ",
-      gamesPlayedPercent,
+      round(gamesPlayedPercent),
       "% of games in the ",
       player_data$season,
-      " season. Of these games, they spent ",
+      " season. Of these games, he spent ",
       round(frequencyInFoulTrouble),
       " in foul trouble."
     )
@@ -463,9 +466,9 @@ get_player_personal_data <- function(name) {
     name,
     "'s most recent season was the ",
     player_personal_data$season,
-    " season. The player played for the ",
+    " season. He played for the ",
     player_personal_data$team_name,
-    ". The player's jersey number was ",
+    ". His jersey number was ",
     player_personal_data$jersey_number,
     ". ",
     name,
