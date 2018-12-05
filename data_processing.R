@@ -67,6 +67,7 @@ connection <- dbConnect(
 library(ggplot2)
 library(zoo)
 library(reshape2)
+library(spatstat.utils)
 
 # Get player list for shiny error handling
 # Only done once, so now commented out
@@ -98,7 +99,6 @@ get_player_data <- function (name) {
     collect()
 }
 
-library(spatstat.utils)
 percentRange <- c(0, 1)
 convertPctFromDecimal <- function(numberVector) {
   for (i in 1:length(numberVector)) {
