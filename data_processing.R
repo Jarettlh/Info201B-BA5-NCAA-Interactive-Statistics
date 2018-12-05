@@ -73,7 +73,7 @@ library(reshape2)
 
 # playerList <- tbl(connection, "mbb_players_games_sr") %>%
 #   select(full_name) %>%
-#   collect() %>% 
+#   collect() %>%
 #   unique
 # saveRDS(playerList, './playerList.RDS')
 
@@ -98,13 +98,29 @@ get_player_data <- function (name) {
     collect()
 }
 
+library(spatstat.utils)
+percentRange <- c(0, 1)
+convertPctFromDecimal <- function(numberVector) {
+  for (i in 1:length(numberVector)) {
+    if (inside.range(numberVector[i], percentRange)) {
+      numberVector[i] = numberVector[i] * 100
+    }
+  }
+  return(numberVector)
+}
 # PLAYER PLOT 1
 # This function creates a line graph which displays a player's rolling averages for their most recent
 # season. This includes free throws, two pointers, and three pointers. (SETH)
 create_percent_season_plot <- function (name) {
   player_data <- get_player_data(name)
   ordered_player_data <-
-    player_data[order(as.Date(player_data$scheduled_date)), ]
+    player_data[order(as.Date(player_data$scheduled_date)),]
+  ordered_player_data <- mutate(
+    ordered_player_data,
+    two_points_pct = convertPctFromDecimal(two_points_pct),
+    free_throws_pct = convertPctFromDecimal(free_throws_pct),
+    three_points_pct = convertPctFromDecimal(three_points_pct)
+  )
   ordered_player_data <-
     data.frame(
       ordered_player_data,
@@ -153,7 +169,7 @@ create_percent_season_plot <- function (name) {
       ordered_player_data[1, 2],
       " Season"
     )) +
-    theme(plot.title = element_text(hjust = 0.5, face="bold"))
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   print(p)
 }
 
@@ -187,9 +203,15 @@ shot_type_comparison <- function (name) {
     ) +
     xlab("Shot Type") +
     ylab("Frequency") +
-    ggtitle(paste0("Shot Type Frequency and Success by ", name, " in the ", shots[1, 2], " Season")) +
-    theme(plot.title = element_text(hjust = 0.5, face="bold"))
-    print(p)
+    ggtitle(paste0(
+      "Shot Type Frequency and Success by ",
+      name,
+      " in the ",
+      shots[1, 2],
+      " Season"
+    )) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+  print(p)
 }
 
 # DEPENDANCY FOR PLAYER PLOT 3
@@ -215,8 +237,14 @@ point_assist_block_comparison <- function (name) {
     xlab("Date") +
     ylab("Count") +
     scale_colour_manual(values = c("green", "red", "cyan")) +
-    ggtitle(paste0("Points, Blocks, and Assists by ", name, " in the ", p_b_a_data[1, 2], " Season")) +
-    theme(plot.title = element_text(hjust = 0.5, face="bold"))
+    ggtitle(paste0(
+      "Points, Blocks, and Assists by ",
+      name,
+      " in the ",
+      p_b_a_data[1, 2],
+      " Season"
+    )) +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"))
   print(p)
 }
 
@@ -484,44 +512,44 @@ get_player_personal_data <- function(name) {
 # -------------------------- Yearly sentences (IBRAR) ----------------------------------
 
 # YEARLY PARAGRAPH DEPENDANCIES
-  getYearlyStatsPlayer <- function(year){
-    games <- tbl(connection, "mbb_players_games_sr") %>%
-      filter(season == as.integer(year)) %>%
-      select(
-        full_name,
-        scheduled_date,
-        jersey_number,
-        field_goals_made,
-        field_goals_att,
-        field_goals_pct,
-        points
-      ) %>% 
+getYearlyStatsPlayer <- function(year) {
+  games <- tbl(connection, "mbb_players_games_sr") %>%
+    filter(season == as.integer(year)) %>%
+    select(
+      full_name,
+      scheduled_date,
+      jersey_number,
+      field_goals_made,
+      field_goals_att,
+      field_goals_pct,
+      points
+    ) %>%
     collect()
-  }
-  
-  getYearlyStatsTeam <- function(year){
-    games <- tbl(connection, "mbb_teams_games_sr") %>%
-      filter(season == as.integer(year)) %>%
-      select(
-        market, 
-        name, 
-        gametime, 
-        season, 
-        points,
-        assists,
-        field_goals_made,
-        field_goals_att,
-        field_goals_pct,
-        three_points_made,
-        personal_fouls
-      ) %>% 
+}
+
+getYearlyStatsTeam <- function(year) {
+  games <- tbl(connection, "mbb_teams_games_sr") %>%
+    filter(season == as.integer(year)) %>%
+    select(
+      market,
+      name,
+      gametime,
+      season,
+      points,
+      assists,
+      field_goals_made,
+      field_goals_att,
+      field_goals_pct,
+      three_points_made,
+      personal_fouls
+    ) %>%
     collect()
-  }
-  
+}
+
 ## Who was the best player in a single game for certian season?
 getBestPlayerInSingleGameForYear <- function(yearlyPlayerStats) {
   games <- yearlyPlayerStats %>%
-    na.omit(invert=TRUE) %>% 
+    na.omit(invert = TRUE) %>%
     filter(points == max(points)) %>%
     select(
       full_name,
@@ -531,31 +559,31 @@ getBestPlayerInSingleGameForYear <- function(yearlyPlayerStats) {
       field_goals_att,
       field_goals_pct,
       points
-    ) 
+    )
   
-  return(games[1, ])
+  return(games[1,])
 }
 
 ## Which player had the most avg points in a certain season?
 getBestAvgForPlayerInYear <- function(yearlyPlayerStats) {
   games <- yearlyPlayerStats %>%
-    na.omit(invert=TRUE) %>% 
+    na.omit(invert = TRUE) %>%
     select(full_name, points) %>%
     group_by(full_name) %>%
     mutate(pointsAvg = mean(points)) %>%
     filter(pointsAvg == max(pointsAvg)) %>%
-    arrange(-pointsAvg) 
+    arrange(-pointsAvg)
   
-  return(games[1, ])
+  return(games[1,])
 }
 
 ## What team had the highest ammount of points scored in a game for certain season?
 getHighestPointInGameForYear <- function(yearlyTeamStats) {
   games <- yearlyTeamStats %>%
     filter(points == max(points)) %>%
-    select(market, name, gametime, season, points) 
+    select(market, name, gametime, season, points)
   
-  return(games[1, ])
+  return(games[1,])
 }
 
 ## What team had the highest number of
@@ -565,147 +593,168 @@ getHighestAssistsInGameForYear <- function(yearlyTeamStats) {
     filter(assists == max(assists)) %>%
     select(market, name, gametime, season, assists)
   
-  return(games[1, ])
+  return(games[1,])
 }
 
 # Field goals made in a game
 getHighestFieldGoalsMadeInGameForYear <- function(yearlyTeamStats) {
-  games <-yearlyTeamStats %>%
+  games <- yearlyTeamStats %>%
     filter(field_goals_made == max(field_goals_made)) %>%
-    select(market, name, gametime, season, field_goals_made) 
+    select(market, name, gametime, season, field_goals_made)
   
-  return(games[1, ])
+  return(games[1,])
 }
 
 # Field goals attempted in a game
-getHighestFieldGoalsAttemptedInGameForYear <- function(yearlyTeamStats) {
-  games <- yearlyTeamStats %>%
-    filter(field_goals_att == max(field_goals_att)) %>%
-    select(market, name, gametime, season, field_goals_att)
-  
-  return(games[1, ])
-}
+getHighestFieldGoalsAttemptedInGameForYear <-
+  function(yearlyTeamStats) {
+    games <- yearlyTeamStats %>%
+      filter(field_goals_att == max(field_goals_att)) %>%
+      select(market, name, gametime, season, field_goals_att)
+    
+    return(games[1,])
+  }
 
 # Field goal percentage in a game
-getHighestFieldGoalsPercentageInGameForYear <- function(yearlyTeamStats) {
-  games <- yearlyTeamStats %>%
-    filter(field_goals_pct == max(field_goals_pct)) %>%
-    select(market, name, gametime, season, field_goals_pct)
-  
-  return(games[1, ])
-}
+getHighestFieldGoalsPercentageInGameForYear <-
+  function(yearlyTeamStats) {
+    games <- yearlyTeamStats %>%
+      filter(field_goals_pct == max(field_goals_pct)) %>%
+      select(market, name, gametime, season, field_goals_pct)
+    
+    return(games[1,])
+  }
 
 # Three pointers made in a game
 getHighestThreePointMadeInGameForYear <- function(yearlyTeamStats) {
   games <- yearlyTeamStats %>%
     filter(three_points_made == max(three_points_made)) %>%
-    select(market, name, gametime, season, three_points_made) 
+    select(market, name, gametime, season, three_points_made)
   
-  return(games[1, ])
+  return(games[1,])
 }
 
 # Fouls in a game
 getHighestFoulsInGameForYear <- function(yearlyTeamStats) {
   games <- yearlyTeamStats %>%
     filter(personal_fouls == max(personal_fouls)) %>%
-    select(market, name, gametime, season, personal_fouls) 
+    select(market, name, gametime, season, personal_fouls)
   
-  return(games[1, ])
+  return(games[1,])
 }
 
 
 # YEARLY PARAGRAPH
 # Puts all yeary functions together
-yearFunctions <- function(year){
+yearFunctions <- function(year) {
   playerYearStats <- getYearlyStatsPlayer(year)
   teamYearStats <- getYearlyStatsTeam(year)
-  table1 <-getBestPlayerInSingleGameForYear(playerYearStats)
-  table2 <-getBestAvgForPlayerInYear(playerYearStats)
-  table3 <-getHighestPointInGameForYear(teamYearStats)
-  table4 <-getHighestAssistsInGameForYear(teamYearStats)
-  table5 <-getHighestFieldGoalsMadeInGameForYear(teamYearStats)
-  table6 <-getHighestFieldGoalsAttemptedInGameForYear(teamYearStats)
-  table7 <- getHighestFieldGoalsPercentageInGameForYear(teamYearStats)
+  table1 <- getBestPlayerInSingleGameForYear(playerYearStats)
+  table2 <- getBestAvgForPlayerInYear(playerYearStats)
+  table3 <- getHighestPointInGameForYear(teamYearStats)
+  table4 <- getHighestAssistsInGameForYear(teamYearStats)
+  table5 <- getHighestFieldGoalsMadeInGameForYear(teamYearStats)
+  table6 <- getHighestFieldGoalsAttemptedInGameForYear(teamYearStats)
+  table7 <-
+    getHighestFieldGoalsPercentageInGameForYear(teamYearStats)
   table8 <- getHighestThreePointMadeInGameForYear(teamYearStats)
   table9 <- getHighestFoulsInGameForYear(teamYearStats)
-  sentence1 <- paste0("The most points scored in one game by a single player in ", 
-                      year, 
-                      " was ",
-                      table1[1,"points"],
-                      " by ",
-                      table1[1, "full_name"]
-                      )
-  sentence2 <- paste0("The player with the most points per game on average in ", 
-                      year, 
-                      " was ",
-                      table2[1,"full_name"],
-                      " with ",
-                      table2[1, "pointsAvg"],
-                      " points per game on average"
-                      )
-  sentence3 <-  paste0("The most points scored by a team in one game in ", 
-                       year, 
-                       " was ",
-                       table3[1,"points"],
-                       " points, by the ",
-                       table3[1, "market"],
-                       " ",
-                       table3[1, "name"]
-                       )
-  sentence4 <-  paste0("The most assists by a team in one game in ", 
-                       year, 
-                       " was ",
-                       table4[1,"assists"],
-                       " assists, by the ",
-                       table4[1, "market"],
-                       " ",
-                       table4[1, "name"]
-  )
-  sentence5 <-  paste0("The most field goals made by a team in one game in ", 
-                       year, 
-                       " was ",
-                       table5[1,"field_goals_made"],
-                       " field goals, by the ",
-                       table5[1, "market"],
-                       " ",
-                       table5[1, "name"]
-  )
-  sentence6 <-  paste0("The most field goals attempted by a team in one game in ", 
-                       year, 
-                       " was ",
-                       table6[1,"field_goals_att"],
-                       " field goals, by the ",
-                       table6[1, "market"],
-                       " ",
-                       table6[1, "name"]
-  )
-  sentence7 <-  paste0("The highest field goal made percentage by a team in one game in ", 
-                       year, 
-                       " was ",
-                       table7[1,"field_goals_pct"],
-                       "%, by the ",
-                       table7[1, "market"],
-                       " ",
-                       table7[1, "name"]
-  )
-  sentence8 <-  paste0("The most three pointers made by a team in one game in ", 
-                       year, 
-                       " was ",
-                       table8[1,"three_points_made"],
-                       " three pointers, by the ",
-                       table8[1, "market"],
-                       " ",
-                       table8[1, "name"]
-  )
-  sentence9 <-  paste0("The highest number of personal fouls given to a team in one game in ", 
-                       year, 
-                       " was ",
-                       table9[1,"personal_fouls"],
-                       " personal fouls, by the ",
-                       table9[1, "market"],
-                       " ",
-                       table9[1, "name"]
-  )
+  sentence1 <-
+    paste0(
+      "The most points scored in one game by a single player in ",
+      year,
+      " was ",
+      table1[1, "points"],
+      " by ",
+      table1[1, "full_name"]
+    )
+  sentence2 <-
+    paste0(
+      "The player with the most points per game on average in ",
+      year,
+      " was ",
+      table2[1, "full_name"],
+      " with ",
+      table2[1, "pointsAvg"],
+      " points per game on average"
+    )
+  sentence3 <-
+    paste0(
+      "The most points scored by a team in one game in ",
+      year,
+      " was ",
+      table3[1, "points"],
+      " points, by the ",
+      table3[1, "market"],
+      " ",
+      table3[1, "name"]
+    )
+  sentence4 <-
+    paste0(
+      "The most assists by a team in one game in ",
+      year,
+      " was ",
+      table4[1, "assists"],
+      " assists, by the ",
+      table4[1, "market"],
+      " ",
+      table4[1, "name"]
+    )
+  sentence5 <-
+    paste0(
+      "The most field goals made by a team in one game in ",
+      year,
+      " was ",
+      table5[1, "field_goals_made"],
+      " field goals, by the ",
+      table5[1, "market"],
+      " ",
+      table5[1, "name"]
+    )
+  sentence6 <-
+    paste0(
+      "The most field goals attempted by a team in one game in ",
+      year,
+      " was ",
+      table6[1, "field_goals_att"],
+      " field goals, by the ",
+      table6[1, "market"],
+      " ",
+      table6[1, "name"]
+    )
+  sentence7 <-
+    paste0(
+      "The highest field goal made percentage by a team in one game in ",
+      year,
+      " was ",
+      table7[1, "field_goals_pct"],
+      "%, by the ",
+      table7[1, "market"],
+      " ",
+      table7[1, "name"]
+    )
+  sentence8 <-
+    paste0(
+      "The most three pointers made by a team in one game in ",
+      year,
+      " was ",
+      table8[1, "three_points_made"],
+      " three pointers, by the ",
+      table8[1, "market"],
+      " ",
+      table8[1, "name"]
+    )
+  sentence9 <-
+    paste0(
+      "The highest number of personal fouls given to a team in one game in ",
+      year,
+      " was ",
+      table9[1, "personal_fouls"],
+      " personal fouls, by the ",
+      table9[1, "market"],
+      " ",
+      table9[1, "name"]
+    )
   
   paragraph <- paste(
     sentence1,
@@ -717,6 +766,6 @@ yearFunctions <- function(year){
     sentence7,
     sentence8,
     sentence9,
-    sep="<br/>"
+    sep = "<br/>"
   )
 }

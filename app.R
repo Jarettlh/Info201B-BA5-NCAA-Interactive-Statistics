@@ -20,19 +20,31 @@ source('./error_handling.R')
 # UI to display for users
 my_ui <- fluidPage(
   h1("NCAA College Basketball Interactive Statistics"),
-  h4("by Jarett Lund-Hopkins, Michelle Bridges, Seth Anderson, and Ibrar Aslam"),
-  h4("code is available at: https://github.com/Jarettlh/Info201B-BA5-NCAA-Interactive-Statistics"),
-  h3("Using a datset from Google BigQuery on NCAA Men's College Basketball, 
-     we have created an interactive page where you can input the name of
-     a Division 1 player, or a year between 2013-2018, and get a wide
-     variety of statistical information on said input."),
-  h4("Some examples you can try are: \"Trae Young\", \"Miles Bridges\", \"Kevin Knox\", or \"2017\" "),
-  h4("The statistics take some time to parse, please be patient (average 10-15 seconds)"),
+  h4(
+    "by INFO201 BA-5: Jarett Lund-Hopkins, Michelle Bridges, Seth Anderson, and Ibrar Aslam"
+  ),
+  h4(
+    "code is available at: https://github.com/Jarettlh/Info201B-BA5-NCAA-Interactive-Statistics"
+  ),
+  h3(
+    "Using a datset from Google BigQuery on NCAA Men's College Basketball,
+    we have created an interactive page where you can input the name of
+    a Division 1 player, or a year between 2013-2018, and get a wide
+    variety of statistical information on said input."
+  ),
+  h4(
+    "Some examples you can try are: \"Trae Young\", \"Miles Bridges\", \"Kevin Knox\", or \"2017\" "
+  ),
+  h4(
+    "The statistics take some time to parse, please be patient (average 10-15 seconds)"
+  ),
   # Text box for input with button
-  textInput('userInputString', 
-            label = NULL, 
-            placeholder = "Enter a Division 1 player, or year", 
-            value = ""),
+  textInput(
+    'userInputString',
+    label = NULL,
+    placeholder = "Enter a Division 1 player, or year",
+    value = ""
+  ),
   submitButton("Show me statistics!"),
   
   # Output for all tables, plots, and statements
@@ -45,7 +57,7 @@ my_ui <- fluidPage(
   plotOutput("playerPlot3"),
   plotOutput("playerPlot4"),
   plotOutput("playerPlot5")
-)
+  )
 
 # ----------------------- Shiny R Backend --------------------------------
 
@@ -58,12 +70,14 @@ my_server <- function(input, output) {
   # Validates user input (displaying error message if needed) OR
   # Gets the type of user input (Player/Year) if input was valid
   inputValidateAndType <- reactive({
-    
     # Convert input string to camel case (eg. "trae young" -> "Trae Young")
     s <- strsplit(input$userInputString, " ")[[1]]
-    rVals$userInputStringConverted <- paste(toupper(substring(s, 1,1)), substring(s, 2),
-          sep="", collapse=" ")
-      
+    rVals$userInputStringConverted <-
+      paste(toupper(substring(s, 1, 1)),
+            substring(s, 2),
+            sep = "",
+            collapse = " ")
+    
     # This function (in error_handling.R) does most the work
     rVals$inputType <- getInputType(rVals$userInputStringConverted)
     
@@ -79,15 +93,23 @@ my_server <- function(input, output) {
   
   
   checkPlayer <- reactive({
-    if(rVals$inputType == "PLAYER"){TRUE}
-    else{FALSE}
+    if (rVals$inputType == "PLAYER") {
+      TRUE
+    }
+    else{
+      FALSE
+    }
   })
   
   checkYear <- reactive({
-    if(rVals$inputType == "YEAR"){TRUE}
-    else{FALSE}
+    if (rVals$inputType == "YEAR") {
+      TRUE
+    }
+    else{
+      FALSE
+    }
   })
-
+  
   
   # Now, we are ready to display our data visualizations
   
@@ -102,51 +124,51 @@ my_server <- function(input, output) {
   # Then, display data visualizations corresponding to inputType
   # if the input was valid
   
-
+  
   output$playerPlot1 <- renderPlot({
-    if(checkPlayer()){
+    if (checkPlayer()) {
       create_percent_season_plot(rVals$userInputStringConverted)
     }
   })
   
   output$playerPlot2 <- renderPlot({
-    if(checkPlayer()){
+    if (checkPlayer()) {
       shot_type_comparison(rVals$userInputStringConverted)
     }
   })
   
   output$playerPlot3 <- renderPlot({
-    if(checkPlayer()){
+    if (checkPlayer()) {
       point_assist_block_comparison(rVals$userInputStringConverted)
     }
   })
   
   output$playerPlot4 <- renderPlot({
-    if(checkPlayer()){
+    if (checkPlayer()) {
       playerMinutesPlayedSeason(rVals$userInputStringConverted)
     }
   })
   
   output$playerPlot5 <- renderPlot({
-    if(checkPlayer()){
+    if (checkPlayer()) {
       playerStealsSeason(rVals$userInputStringConverted)
     }
   })
   
   output$playerText1 <- renderText({
-    if(checkPlayer()){
+    if (checkPlayer()) {
       mostRecentSeasonFoulTrouble(rVals$userInputStringConverted)
     }
   })
   
   output$playerText2 <- renderText({
-    if(checkPlayer()){
+    if (checkPlayer()) {
       get_player_personal_data(rVals$userInputStringConverted)
     }
   })
   
   output$yearText1 <- renderText({
-    if(checkYear()){
+    if (checkYear()) {
       HTML(yearFunctions(rVals$userInputStringConverted))
     }
   })
